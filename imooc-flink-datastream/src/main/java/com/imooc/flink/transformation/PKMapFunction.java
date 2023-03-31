@@ -5,7 +5,6 @@ import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.configuration.Configuration;
 
 public class PKMapFunction extends RichMapFunction<String,Access> {
-
     /**
      * 初始化操作
      * Connection
@@ -15,7 +14,6 @@ public class PKMapFunction extends RichMapFunction<String,Access> {
         super.open(parameters);
         System.out.println("~~~~open~~~~");
     }
-
     /**
      * 清理操作
      */
@@ -23,19 +21,16 @@ public class PKMapFunction extends RichMapFunction<String,Access> {
     public void close() throws Exception {
         super.close();
     }
-
     @Override
     public RuntimeContext getRuntimeContext() {
         return super.getRuntimeContext();
     }
-
     /**
      * 每条数据执行一次
      */
     @Override
     public Access map(String value) throws Exception {
         System.out.println("=====map=====");
-
         String[] splits = value.split(",");
         Long time = Long.parseLong(splits[0].trim());
         String domain = splits[1].trim();

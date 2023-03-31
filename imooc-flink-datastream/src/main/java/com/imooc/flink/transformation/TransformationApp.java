@@ -35,7 +35,6 @@ public class TransformationApp {
     public static void coFlatMap(StreamExecutionEnvironment env) {
         DataStreamSource<String> stream1 = env.fromElements("a b c", "d e f");
         DataStreamSource<String> stream2 = env.fromElements("1,2,3", "4,5,6");
-
         stream1.connect(stream2)
                 .flatMap(new CoFlatMapFunction<String, String, String>() {
                     @Override
@@ -45,7 +44,6 @@ public class TransformationApp {
                             out.collect(split);
                         }
                     }
-
                     @Override
                     public void flatMap2(String value, Collector<String> out) throws Exception {
                         String[] splits = value.split(",");
@@ -65,16 +63,13 @@ public class TransformationApp {
                         return Integer.parseInt(value);
                     }
                 });
-
         // 将2个流连接在一起
         stream1.connect(stream2).map(new CoMapFunction<String, Integer, String>() {
-
             // 处理第一个流的业务逻辑
             @Override
             public String map1(String value) throws Exception {
                 return value.toUpperCase();
             }
-
             // 处理第二个流的业务逻辑
             @Override
             public String map2(Integer value) throws Exception {
@@ -88,17 +83,14 @@ public class TransformationApp {
      * connect 双流  数据结构可以不同， 更加灵活
      */
     public static void connect(StreamExecutionEnvironment env) {
-
         DataStreamSource<Access> stream1 = env.addSource(new AccessSource());
         DataStreamSource<Access> stream2 = env.addSource(new AccessSource());
-
         SingleOutputStreamOperator<Tuple2<String, Access>> stream2new = stream2.map(new MapFunction<Access, Tuple2<String, Access>>() {
             @Override
             public Tuple2<String, Access> map(Access value) throws Exception {
                 return Tuple2.of("pk", value);
             }
         });
-
         stream1.connect(stream2new).map(new CoMapFunction<Access, Tuple2<String, Access>, String>() {
             @Override
             public String map1(Access value) throws Exception {

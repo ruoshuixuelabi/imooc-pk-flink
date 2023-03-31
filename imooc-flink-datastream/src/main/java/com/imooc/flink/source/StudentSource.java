@@ -10,21 +10,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class StudentSource extends RichSourceFunction<Student> {
-
     Connection connection;
     PreparedStatement psmt;
-
     @Override
     public void open(Configuration parameters) throws Exception {
         connection = MySQLUtils.getConnection();
         psmt = connection.prepareStatement("select * from student");
     }
-
     @Override
     public void close() throws Exception {
         MySQLUtils.close(connection, psmt);
     }
-
     @Override
     public void run(SourceContext<Student> ctx) throws Exception {
         ResultSet rs = psmt.executeQuery();
@@ -35,9 +31,7 @@ public class StudentSource extends RichSourceFunction<Student> {
             ctx.collect(new Student(id, name, age));
         }
     }
-
     @Override
     public void cancel() {
-
     }
 }

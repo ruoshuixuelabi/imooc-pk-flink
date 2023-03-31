@@ -1,5 +1,4 @@
 package com.imooc.flink.udf;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.imooc.flink.domain.Access;
@@ -15,30 +14,22 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-
 public class GaodeLocationMapFunction extends RichMapFunction<Access, Access> {
-
     CloseableHttpClient httpClient;
-
     @Override
     public void open(Configuration parameters) throws Exception {
         httpClient = HttpClients.createDefault();
     }
-
     @Override
     public void close() throws Exception {
          if(httpClient != null) httpClient.close();
     }
-
     @Override
     public Access map(Access value) throws Exception {
         String url = "https://restapi.amap.com/v3/ip?ip="+value.ip+"&output=json&key="+ StringUtils.GAODE_KEY;
-
         CloseableHttpResponse response = null;
-
         String province = "-";
         String city = "-";
-
         try {
             HttpGet httpGet = new HttpGet(url);
             response = httpClient.execute(httpGet);
@@ -46,8 +37,6 @@ public class GaodeLocationMapFunction extends RichMapFunction<Access, Access> {
             if(statusCode == 200) {
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity, "UTF-8");
-
-
                 JSONObject jsonObject = JSON.parseObject(result);
                 province = jsonObject.getString("province");
                 city = jsonObject.getString("city");
@@ -59,7 +48,6 @@ public class GaodeLocationMapFunction extends RichMapFunction<Access, Access> {
             value.province = province;
             value.city = city;
         }
-
         return value;
     }
 }
