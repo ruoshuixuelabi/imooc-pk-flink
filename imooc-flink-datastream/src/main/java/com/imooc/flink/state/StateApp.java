@@ -56,13 +56,13 @@ class AvgWithMapState extends RichFlatMapFunction<Tuple2<Long, Long>, Tuple2<Lon
         mapState.put(UUID.randomUUID().toString(), value.f1);
         ArrayList<Long> elements = Lists.newArrayList(mapState.values());
         if (elements.size() == 3) {
-            Long count = 0L;
+            long count = 0L;
             Long sum = 0L;
             for (Long element : elements) {
                 count += 1;
                 sum += element;
             }
-            Double avg = sum / count.doubleValue();
+            Double avg = sum / (double) count;
             out.collect(Tuple2.of(value.f0, avg));
             mapState.clear();
         }

@@ -16,38 +16,29 @@ import java.util.concurrent.TimeUnit;
 public class CheckpointApp {
     public static void main(String[] args) throws Exception {
 //        System.setProperty("HADOOP_USER_NAME", "hadoop");
-
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        /**
+        /*
          * 不开启checkpoint：不重启
-         *
          * 开启了checkpoint
          * 1) 没有配置重启策略：Integer.MAX_VALUE
          * 2) 如果配置了重启策略，就使用我们配置的重启策略覆盖默认的
-         *
          * 重启策略的配置：
          * 1) code
          * 2) yaml
-         *
          */
         env.enableCheckpointing(5000);
 //        env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
-
         // 是否保留
-        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-
+        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+//        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         // 设置StateBackend
 //        env.setStateBackend(new FsStateBackend("file:///Users/rocky/Desktop/Flink/workspace/imooc-flink/checkpoints"));
-
 //        env.setStateBackend(new FsStateBackend("hdfs://ruozedata001:8020/imooc-flink-checkpoints"));
-
         // 自定义设置我们需要的重启策略
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(
                 3, // 尝试重启的次数
                 Time.of(5, TimeUnit.SECONDS) // 间隔
         ));
-
         DataStreamSource<String> source = env.socketTextStream("ruozedata001", 9527);
         source.map(new MapFunction<String, String>() {
             @Override
@@ -74,8 +65,6 @@ public class CheckpointApp {
         }).keyBy(x -> x.f0)
                 .sum(1)
                 .print();
-
-
         env.execute("CheckpointApp");
     }
 }
