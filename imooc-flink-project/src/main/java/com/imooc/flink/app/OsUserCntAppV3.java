@@ -28,24 +28,19 @@ import org.apache.flink.util.Collector;
  *
  */
 public class OsUserCntAppV3 {
-
     public static void main(String[] args) throws Exception {
-
         StreamExecutionEnvironment environment = StreamExecutionEnvironment.getExecutionEnvironment();
-
         SingleOutputStreamOperator<Access> cleanStream = environment.readTextFile("data/access.json")
                 .map(new MapFunction<String, Access>() {
                     @Override
                     public Access map(String value) throws Exception {
                         // TODO...  json ==> Access
-
                         try {
                             return JSON.parseObject(value, Access.class);
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
                         }
-
                     }
                 }).filter(x -> x != null)
                 .filter(new FilterFunction<Access>() {
@@ -54,19 +49,14 @@ public class OsUserCntAppV3 {
                         return "startup".equals(value.event);
                     }
                 });
-
-
         cleanStream.keyBy(x -> x.deviceType)
                 .process(new KeyedProcessFunction<String, Access, Access>() {
-
                     private transient ValueState<BloomFilter<String>> state;
-
                     @Override
                     public void open(Configuration parameters) throws Exception {
                         ValueStateDescriptor<BloomFilter<String>> descriptor = new ValueStateDescriptor<>("s", TypeInformation.of(new TypeHint<BloomFilter<String>>() {}));
                         state = getRuntimeContext().getState(descriptor);
                     }
-
                     @Override
                     public void processElement(Access value, Context ctx, Collector<Access> out) throws Exception {
                         String device = value.device;
@@ -74,19 +64,14 @@ public class OsUserCntAppV3 {
                         if(null == bloomFilter) {
                             bloomFilter = BloomFilter.create(Funnels.unencodedCharsFunnel(), 100000);
                         }
-
                         if(!bloomFilter.mightContain(device)) {
                             bloomFilter.put(device);
                             value.nu = 1;
                             state.update(bloomFilter);
                         }
-
                         out.collect(value);
                     }
                 }).print();
-
-
-        environment.execute("OsUserCntAppV2");
-
+        environment.execute("OsUserCntAppV3");
     }
 }

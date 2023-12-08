@@ -1,5 +1,8 @@
 package com.imooc.flink.domain;
 
+import lombok.Data;
+
+@Data
 public class EventCatagoryProductCount {
 
     public String event;
